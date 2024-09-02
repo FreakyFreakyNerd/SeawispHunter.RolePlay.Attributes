@@ -10,19 +10,13 @@
 */
 using System;
 using System.ComponentModel;
-
-#if NET7_0_OR_GREATER
 using System.Numerics;
-#endif
 
 namespace SeawispHunter.RolePlay.Attributes {
 
 [Serializable]
 public class Value<T> : IValue<T> {
 
-#if UNITY_5_3_OR_NEWER
-  [UnityEngine.SerializeField]
-#endif
   protected T _value;
   public virtual T value {
     get => _value;
@@ -118,9 +112,7 @@ public static class Value {
     */
 [Serializable]
 public class BoundedValue<T> : IValue<T>, IBounded<T>
-#if NET7_0_OR_GREATER
   where T : INumber<T>
-#endif
 {
   public readonly IReadOnlyValue<T> lowerBound;
   public readonly IReadOnlyValue<T> upperBound;
@@ -138,16 +130,11 @@ public class BoundedValue<T> : IValue<T>, IBounded<T>
   }
 
   public static T Clamp(T value, T minValue, T maxValue) {
-#if NET7_0_OR_GREATER
     if (value < minValue)
       value = minValue;
     if (value > maxValue)
       value = maxValue;
     return value;
-#else
-    var op = Modifier.GetOp<T>();
-    return op.Max(minValue, op.Min(maxValue, value));
-#endif
   }
 
   public BoundedValue(T value, IReadOnlyValue<T> lowerBound, IReadOnlyValue<T> upperBound) {
@@ -181,9 +168,6 @@ public class BoundedValue<T> : IValue<T>, IBounded<T>
 /** A simple read only value. */
 [Serializable]
 public class ReadOnlyValue<T> : IReadOnlyValue<T> {
-#if UNITY_5_3_OR_NEWER
-  [UnityEngine.SerializeField]
-#endif
   private T _value;
   public T value => _value;
   public ReadOnlyValue(T value) => _value = value;

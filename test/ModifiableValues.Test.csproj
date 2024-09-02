@@ -1,8 +1,8 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <!-- <TargetFrameworks>net8.0;netcoreapp3.1</TargetFrameworks> -->
-    <TargetFrameworks>net8.0</TargetFrameworks>
+	<TargetFrameworks>net8.0</TargetFrameworks>
     <Nullable>disable</Nullable>
 
     <IsPackable>false</IsPackable>
@@ -26,7 +26,7 @@
 
 
   <ItemGroup>
-    <ProjectReference Include="..\src\src.csproj" />
+    <ProjectReference Include="..\src\ModifiableValues.csproj" />
   </ItemGroup>
 
   <!-- https://stackoverflow.com/questions/58166709/how-to-test-net-standard-and-core-versions-of-a-library-properly -->

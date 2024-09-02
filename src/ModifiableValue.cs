@@ -14,10 +14,7 @@ using System.Text;
 using System.ComponentModel;
 using System.Collections;
 using System.Collections.Generic;
-
-#if NET7_0_OR_GREATER
 using System.Numerics;
-#endif
 
 namespace SeawispHunter.RolePlay.Attributes {
 
@@ -41,7 +38,6 @@ public static class ModifiableValue {
   }
 
   /** Return the delta a modifier (may be multiple) does. */
-#if NET7_0_OR_GREATER
   public static T ProbeDelta<T>(this IModifiable<IReadOnlyValue<T>, T> modifiable,
                                 IModifier<T> modifier) where T : INumber<T> {
     // => modifiable.ProbeAffects(modifier).Select(x => x.after - x.before).Sum();
@@ -50,17 +46,6 @@ public static class ModifiableValue {
       accum += delta;
     return accum;
   }
-#else
-  public static T ProbeDelta<T>(this IModifiable<IReadOnlyValue<T>, T> modifiable,
-                                IModifier<T> modifier) {
-    var op = Modifier.GetOp<T>();
-    T accum = op.zero;
-    foreach (var delta in modifiable.ProbeAffects(modifier)
-             .Select(x => op.Sum(x.after, op.Negate(x.before))))
-      accum = op.Sum(accum, delta);
-    return accum;
-  }
-#endif
 
   /** Remove all of an item from a collection. Returns the number of items removed. */
   public static int RemoveAll<T>(this ICollection<T> collection, T item) {
@@ -70,46 +55,6 @@ public static class ModifiableValue {
     return count;
   }
 }
-
-#if UNITY_5_3_OR_NEWER
-/** In order to make Unity's serialization work properly we need to have a
-    concrete type rather than interface as its initial value. */
-[Serializable]
-public class ModifiableValue<T> : Modifiable<Value<T>, T>, IModifiableValue<T> {
-
-  public ModifiableValue(Value<T> initial) : base(initial) { }
-  public ModifiableValue(T initialValue) : base(new Value<T>(initialValue)) { }
-  public ModifiableValue() : this(default(T)) { }
-
-  IValue<T> IModifiable<IValue<T>,T>.initial => _initial;
-}
-
-[Serializable]
-public class ModifiableReadOnlyValue<T> : Modifiable<ReadOnlyValue<T>, T> {
-
-  public ModifiableReadOnlyValue(ReadOnlyValue<T> initial) : base(initial) { }
-  public ModifiableReadOnlyValue(T initialValue) : base(new ReadOnlyValue<T>(initialValue)) { }
-  public ModifiableReadOnlyValue() : this(default(T)) { }
-
-  IReadOnlyValue<T> IModifiable<IReadOnlyValue<T>,T>.initial => _initial;
-}
-
-// Sometimes we still need an IValue though!
-public class ModifiableIValue<T> : Modifiable<IValue<T>, T>, IModifiableValue<T> {
-
-  public ModifiableIValue(IValue<T> initial) : base(initial) { }
-  public ModifiableIValue(T initialValue) : base(new Value<T>(initialValue)) { }
-  public ModifiableIValue() : this(default(T)) { }
-}
-
-public class ModifiableIReadOnlyValue<T> : Modifiable<IReadOnlyValue<T>, T> {
-
-  public ModifiableIReadOnlyValue(IReadOnlyValue<T> initial) : base(initial) { }
-  public ModifiableIReadOnlyValue(T initialValue) : base(new ReadOnlyValue<T>(initialValue)) { }
-  public ModifiableIReadOnlyValue() : this(default(T)) { }
-}
-
-#else
 
 [Serializable]
 public class ModifiableValue<T> : Modifiable<IValue<T>, T>, IModifiableValue<T> {
@@ -126,7 +71,6 @@ public class ModifiableReadOnlyValue<T> : Modifiable<IReadOnlyValue<T>, T> {
   public ModifiableReadOnlyValue(T initialValue) : base(new ReadOnlyValue<T>(initialValue)) { }
   public ModifiableReadOnlyValue() : this(default(T)) { }
 }
-#endif
 
 /** This Modifiable's `value` is bounded.
 
@@ -175,9 +119,6 @@ public class BoundedModifiable<S,T> : Modifiable<S,T>, IBounded<T>
 public class Modifiable<S,T> : IModifiable<S,T> where S : IReadOnlyValue<T> {
   protected ModifiersSortedList _modifiers;
   public IPriorityCollection<IModifier<T>> modifiers => _modifiers;
-#if UNITY_5_3_OR_NEWER
-  [UnityEngine.SerializeField]
-#endif
   protected S _initial;
   public virtual S initial => _initial;
   // XXX: Consider caching?
